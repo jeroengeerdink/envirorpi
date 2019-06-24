@@ -2,16 +2,23 @@
 
 import sys
 import time
+import json
+import requests
 
 from envirophat import light, weather, motion, analog
 
 unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
-
+url = 'http://httpbin.org/post'
 
 def write(line):
     sys.stdout.write(line)
     sys.stdout.flush()
 
+def send(data):
+    sys.stdout.write(data)
+    data_json = json.dumps(data)
+    headers = {'Content-type': 'application/json'}
+    response = requests.post(url, data=data_json, headers=headers)
 
 write("--- Enviro pHAT Monitoring ---")
 
@@ -55,11 +62,34 @@ Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
             az=acc_values[2]
         )
 
+        data = {
+            "system": "rpi_pega",
+            "timestamp": time.time(),
+            "temperature": weather.temperature(),
+            "pressure": weather.pressure(unit=unit),
+            "altitude": weather.altitude(),
+            "light": light.light(),
+            "redlight": rgb[0],
+            "greenlight": rgb[1],
+            "bluelight": rgb[2],
+            "heading": motion.heading(),
+            "magneto_x": mag_values[0],
+            "magneto_y": mag_values[1],
+            "magneto_z": mag_values[2],
+            "accel_x": acc_values[0],
+            "accel_y": acc_values[1],
+            "accel_z": acc_values[2],
+            "analog_0": analog_values[0],
+            "analog_1": analog_values[1],
+            "analog_2": analog_values[2],
+            "analog_3": analog_values[3]
+        }
+
         output = output.replace("\n", "\n\033[K")
         write(output)
         lines = len(output.split("\n"))
         write("\033[{}A".format(lines - 1))
-
+        send(data)
         time.sleep(1)
 
 except KeyboardInterrupt:
