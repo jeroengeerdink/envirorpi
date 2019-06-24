@@ -8,17 +8,17 @@ import requests
 from envirophat import light, weather, motion, analog
 
 unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
-url = 'http://httpbin.org/post'
+url = 'http://172.31.26.234:7003/stream/RPiEvent'
 
 def write(line):
     sys.stdout.write(line)
     sys.stdout.flush()
 
 def send(data):
-    sys.stdout.write(data)
     data_json = json.dumps(data)
+    sys.stdout.write(data_json)
     headers = {'Content-type': 'application/json'}
-    response = requests.post(url, data=data_json, headers=headers)
+    response = requests.post(url, data=data_json, headers=headers, auth=('raspberrypi', 'install12345!'))
 
 write("--- Enviro pHAT Monitoring ---")
 
@@ -63,7 +63,7 @@ Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
         )
 
         data = {
-            "system": "rpi_pega",
+            "systemid": "rpi_pega",
             "timestamp": time.time(),
             "temperature": weather.temperature(),
             "pressure": weather.pressure(unit=unit),
