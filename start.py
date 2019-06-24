@@ -8,7 +8,9 @@ import requests
 from envirophat import light, weather, motion, analog
 
 unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
-url = 'http://172.31.26.234:7003/stream/RPiEvent'
+
+#url = 'http://172.31.26.234:7003/stream/RPiEvent'
+url = 'https://ibestuur.pegatsdemo.com/prweb/PRRestService/RPiEnviro/v1/rpi/enviro/event'
 
 def write(line):
     sys.stdout.write(line)
