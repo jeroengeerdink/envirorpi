@@ -40,6 +40,7 @@ def write(line):
     sys.stdout.flush()
 
 def detectEvent(data):
+    global previous
     if abs(data["accel_x"]) < abs(previous["accel_x"])*1.1:
         send(data)
     elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.1:
