@@ -40,12 +40,13 @@ def write(line):
     sys.stdout.flush()
 
 def detectEvent(data):
-    if abs(data.accel_x) < abs(previous.accel_x)*1.1:
+    if abs(data["accel_x"]) < abs(previous["accel_x"])*1.1:
         send(data)
-    elif abs(data.accel_y) < abs(previous.accel_y)*1.1:
+    elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.1:
         send(data)
-    elif abs(data.accel_z) < abs(previous.accel_z)*1.1:
+    elif abs(data["accel_z"]) < abs(previous["accel_z"])*1.1:
         send(data)
+    previous = data
 
 def send(data):
     data_json = json.dumps(data)
