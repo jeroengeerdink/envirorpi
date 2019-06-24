@@ -12,13 +12,43 @@ unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
 #url = 'http://172.31.26.234:7003/stream/RPiEvent'
 url = 'https://ibestuur.pegatsdemo.com/prweb/PRRestService/RPiEnviro/v1/rpi/enviro/event'
 
+previous = {
+    "systemid": "rpi_pega",
+    "timestamp": 0.0,
+    "temperature": 0.0,
+    "pressure": 0.0,
+    "altitude": 0.0,
+    "light": 0,
+    "redlight": 0,
+    "greenlight": 0,
+    "bluelight": 0,
+    "heading": 0.0,
+    "magneto_x": 0,
+    "magneto_y": 0,
+    "magneto_z": 0,
+    "accel_x": 0,
+    "accel_y": 0,
+    "accel_z": 0,
+    "analog_0": 0,
+    "analog_1": 0,
+    "analog_2": 0,
+    "analog_3": 0
+}
+
 def write(line):
     sys.stdout.write(line)
     sys.stdout.flush()
 
+def detectEvent(data):
+    if abs(data.accel_x) < abs(previous.accel_x)*1.1:
+        send(data)
+    elif abs(data.accel_y) < abs(previous.accel_y)*1.1:
+        send(data)
+    elif abs(data.accel_z) < abs(previous.accel_z)*1.1:
+        send(data)
+
 def send(data):
     data_json = json.dumps(data)
-    sys.stdout.write(data_json)
     headers = {'Content-type': 'application/json'}
     response = requests.post(url, data=data_json, headers=headers, auth=('raspberrypi', 'install12345!'))
 
@@ -91,8 +121,8 @@ Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
         write(output)
         lines = len(output.split("\n"))
         write("\033[{}A".format(lines - 1))
-        send(data)
-        time.sleep(1)
+        detectEvent(data)
+        time.sleep(.2)
 
 except KeyboardInterrupt:
     pass
