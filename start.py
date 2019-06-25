@@ -29,14 +29,32 @@ if connect_type == "WS":
     print(url)
     ws = create_connection(url)
 
+
+template = """
+Device: {device_name}
+Connect Type: {conn_type}
+URL: {rest_url} or {ws_url}
+Counter: {cnt}
+Temp: {t:.2f}c
+Pressure: {p:.2f}{unit}
+Altitude: {a:.2f}m
+Light: {c}
+RGB: {r}, {g}, {b}
+Heading: {h}
+Magnetometer: {mx} {my} {mz}
+Accelerometer: {ax}g {ay}g {az}g
+Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
+
+"""
+
 #unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
 
 #url = 'http://172.31.26.234:7003/stream/RPiEvent'
 #url = 'https://ibestuur.pegatsdemo.com/prweb/PRRestService/RPiEnviro/v1/rpi/enviro/event'
 
 
-previous = {
-    "systemid": "rpi_pega",
+buffer = {
+    "systemid": device_name,
     "timestamp": 0.0,
     "temperature": 0.0,
     "pressure": 0.0,
@@ -102,28 +120,15 @@ def sendREST(data):
 write("--- Enviro pHAT Monitoring ---")
 
 try:
+    loopCount = 0
     while True:
+        loopCount = loopCount + 1
         rgb = light.rgb()
         analog_values = analog.read_all()
         mag_values = motion.magnetometer()
         acc_values = [round(x, 2) for x in motion.accelerometer()]
 
-        output = """
-Device: {device_name}
-Connect Type: {conn_type}
-URL: {rest_url} or {ws_url}
-Counter: {cnt}
-Temp: {t:.2f}c
-Pressure: {p:.2f}{unit}
-Altitude: {a:.2f}m
-Light: {c}
-RGB: {r}, {g}, {b}
-Heading: {h}
-Magnetometer: {mx} {my} {mz}
-Accelerometer: {ax}g {ay}g {az}g
-Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
-
-""".format(
+        output = template.format(
             unit=unit,
             a=weather.altitude(),  # Supply your local qnh for more accurate readings
             t=weather.temperature(),
@@ -148,38 +153,65 @@ Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
             device_name=device_name,
             rest_url=rest_url,
             ws_url=ws_url
-
         )
 
         data = {
-            "systemid": "rpi_pega",
+            "systemid": device_name,
             "timestamp": time.time(),
             "temperature": weather.temperature(),
             "pressure": weather.pressure(unit=unit),
-            "altitude": weather.altitude(),
+            "altitude": abs(weather.altitude()),
             "light": light.light(),
             "redlight": rgb[0],
             "greenlight": rgb[1],
             "bluelight": rgb[2],
             "heading": motion.heading(),
-            "magneto_x": mag_values[0],
-            "magneto_y": mag_values[1],
-            "magneto_z": mag_values[2],
-            "accel_x": acc_values[0],
-            "accel_y": acc_values[1],
-            "accel_z": acc_values[2],
-            "analog_0": analog_values[0],
-            "analog_1": analog_values[1],
-            "analog_2": analog_values[2],
-            "analog_3": analog_values[3]
+            "magneto_x": abs(mag_values[0]),
+            "magneto_y": abs(mag_values[1]),
+            "magneto_z": abs(mag_values[2]),
+            "accel_x": abs(acc_values[0]),
+            "accel_y": abs(acc_values[1]),
+            "accel_z": abs(acc_values[2]),
+            "analog_0": abs(analog_values[0]),
+            "analog_1": abs(analog_values[1]),
+            "analog_2": abs(analog_values[2]),
+            "analog_3": abs(analog_values[3])
         }
+
+        for attr in data:
+            if attr != "systemid":
+                val = max(data[attr], buffer[attr])
+                data[attr] = val
 
         output = output.replace("\n", "\n\033[K")
         write(output)
         lines = len(output.split("\n"))
         write("\033[{}A".format(lines - 1))
-        detectEvent(data)
-        time.sleep(.2)
+        if loopCount >= 20:
+            buffer = {
+                "systemid": device_name,
+                "timestamp": 0.0,
+                "temperature": 0.0,
+                "pressure": 0.0,
+                "altitude": 0.0,
+                "light": 0,
+                "redlight": 0,
+                "greenlight": 0,
+                "bluelight": 0,
+                "heading": 0.0,
+                "magneto_x": 0,
+                "magneto_y": 0,
+                "magneto_z": 0,
+                "accel_x": 0,
+                "accel_y": 0,
+                "accel_z": 0,
+                "analog_0": 0,
+                "analog_1": 0,
+                "analog_2": 0,
+                "analog_3": 0
+            }
+            detectEvent(data)
+        time.sleep(.01)
 
 except KeyboardInterrupt:
     pass
