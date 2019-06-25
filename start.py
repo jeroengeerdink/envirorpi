@@ -120,7 +120,7 @@ def sendREST(data):
 write("--- Enviro pHAT Monitoring ---")
 
 try:
-    loopCount = 0
+    timestamp = time.time()
     while True:
         loopCount = loopCount + 1
         rgb = light.rgb()
@@ -187,7 +187,7 @@ try:
         write(output)
         lines = len(output.split("\n"))
         write("\033[{}A".format(lines - 1))
-        if loopCount >= 20:
+        if timestamp + 5 < time.time():
             buffer = {
                 "systemid": device_name,
                 "timestamp": 0.0,
@@ -210,7 +210,7 @@ try:
                 "analog_2": 0,
                 "analog_3": 0
             }
-            loopCount = 0
+            timestamp = time.time()
             detectEvent(data)
         time.sleep(.01)
 
