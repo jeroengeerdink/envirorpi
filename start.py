@@ -46,7 +46,7 @@ def detectEvent(data):
     #if abs(data["accel_x"]) < abs(previous["accel_x"])*1.2:
     #    send(data)
     #elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.2:
-        send(data)
+    #    send(data)
     #elif abs(data["accel_z"]) < abs(previous["accel_z"])*1.2:
     send(data)
     previous = data
