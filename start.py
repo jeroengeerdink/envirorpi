@@ -23,7 +23,7 @@ device_name = config['DEFAULT']['DEVICE_NAME']
 
 ws = None
 if connect_type == "WS":
-    url = ws_url + "?auth=" + base64.b64encode(username + ":" + password)
+    url = ws_url + "?auth=" + base64.b64encode((username + ":" + password).encode('ascii'))
     print(url)
     ws = create_connection(url)
 
