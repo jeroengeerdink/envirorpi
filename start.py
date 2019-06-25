@@ -4,13 +4,31 @@ import sys
 import time
 import json
 import requests
+import configparser
+from websocket import create_connection
 
 from envirophat import light, weather, motion, analog, leds
 
-unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+unit = config['DEFAULT']['PRESSURE_UNIT']
+rest_url = config['DEFAULT']['ENDPOINT_REST']
+ws_url = config['DEFAULT']['ENDPOINT_WS']
+connect_type = config['DEFAULT']['CONNECT_TYPE']
+rest_user = config['DEFAULT']['REST_USER']
+rest_pass = config['DEFAULT']['REST_PASS']
+device_name = config['DEFAULT']['DEVICE_NAME']
+
+ws = None
+if connect_type == "WS":
+    ws = create_connection(ws_url)
+
+#unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
 
 #url = 'http://172.31.26.234:7003/stream/RPiEvent'
-url = 'https://ibestuur.pegatsdemo.com/prweb/PRRestService/RPiEnviro/v1/rpi/enviro/event'
+#url = 'https://ibestuur.pegatsdemo.com/prweb/PRRestService/RPiEnviro/v1/rpi/enviro/event'
+
 
 previous = {
     "systemid": "rpi_pega",
@@ -53,12 +71,28 @@ def detectEvent(data):
 
 def send(data):
     global counter
+    global connect_type
     leds.on()
     counter = counter + 1
+    if connect_type == "WS":
+        sendWS(data)
+    else:
+        sendREST(data)
+    leds.off()
+
+def sendWS(data):
+    global ws
+    data_json = json.dumps(data)
+    ws.send(data_json)
+
+def sendREST(data):
+    global rest_user
+    global rest_pass
+    gloobal rest_url
     data_json = json.dumps(data)
     headers = {'Content-type': 'application/json'}
-    response = requests.post(url, data=data_json, headers=headers, auth=('raspberrypi', 'install12345!'))
-    leds.off()
+    response = requests.post(rest_url, data=data_json, headers=headers, auth=(rest_user, rest_pass))
+
 
 write("--- Enviro pHAT Monitoring ---")
 
