@@ -210,6 +210,7 @@ try:
                 "analog_2": 0,
                 "analog_3": 0
             }
+            loopCount = 0
             detectEvent(data)
         time.sleep(.01)
 
