@@ -5,7 +5,7 @@ import time
 import json
 import requests
 
-from envirophat import light, weather, motion, analog
+from envirophat import light, weather, motion, analog, leds
 
 unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
 
@@ -41,18 +41,20 @@ def write(line):
 
 def detectEvent(data):
     global previous
-    if abs(data["accel_x"]) < abs(previous["accel_x"])*1.1:
+    if abs(data["accel_x"]) < abs(previous["accel_x"])*1.2:
         send(data)
-    elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.1:
+    elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.2:
         send(data)
-    elif abs(data["accel_z"]) < abs(previous["accel_z"])*1.1:
+    elif abs(data["accel_z"]) < abs(previous["accel_z"])*1.2:
         send(data)
     previous = data
 
 def send(data):
+    leds.on()
     data_json = json.dumps(data)
     headers = {'Content-type': 'application/json'}
     response = requests.post(url, data=data_json, headers=headers, auth=('raspberrypi', 'install12345!'))
+    leds.off()
 
 write("--- Enviro pHAT Monitoring ---")
 
