@@ -24,7 +24,7 @@ device_name = config['DEFAULT']['DEVICE_NAME']
 ws = None
 if connect_type == "WS":
     url = ws_url + "?auth=" + base64.b64encode(username + ":" + password)
-    print url
+    print(url)
     ws = create_connection(url)
 
 #unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
