@@ -25,7 +25,7 @@ ws = None
 if connect_type == "WS":
     str = "{username}:{password}".format(password=password,username=username)
     print(str)
-    url = ws_url + "?auth=" + base64.encodestring(str)
+    url = ws_url + "?auth=" + str(base64.encodestring(str), "utf-8")
     print(url)
     ws = create_connection(url)
 
