@@ -88,7 +88,7 @@ def sendWS(data):
 def sendREST(data):
     global rest_user
     global rest_pass
-    gloobal rest_url
+    global rest_url
     data_json = json.dumps(data)
     headers = {'Content-type': 'application/json'}
     response = requests.post(rest_url, data=data_json, headers=headers, auth=(rest_user, rest_pass))
