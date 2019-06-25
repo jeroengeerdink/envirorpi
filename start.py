@@ -5,6 +5,7 @@ import time
 import json
 import requests
 import configparser
+import base64
 from websocket import create_connection
 
 from envirophat import light, weather, motion, analog, leds
@@ -16,13 +17,14 @@ unit = config['DEFAULT']['PRESSURE_UNIT']
 rest_url = config['DEFAULT']['ENDPOINT_REST']
 ws_url = config['DEFAULT']['ENDPOINT_WS']
 connect_type = config['DEFAULT']['CONNECT_TYPE']
-rest_user = config['DEFAULT']['REST_USER']
-rest_pass = config['DEFAULT']['REST_PASS']
+username = config['DEFAULT']['USER']
+password = config['DEFAULT']['PASS']
 device_name = config['DEFAULT']['DEVICE_NAME']
 
 ws = None
 if connect_type == "WS":
-    ws = create_connection(ws_url)
+    url = ws_url + "?auth=" + base64.b64encode(username + ":" + password)
+    ws = create_connection(url)
 
 #unit = 'hPa'  # Pressure unit, can be either hPa (hectopascals) or Pa (pascals)
 
@@ -86,8 +88,8 @@ def sendWS(data):
     ws.send(data_json)
 
 def sendREST(data):
-    global rest_user
-    global rest_pass
+    global username
+    global password
     global rest_url
     data_json = json.dumps(data)
     headers = {'Content-type': 'application/json'}
