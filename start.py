@@ -35,22 +35,26 @@ previous = {
     "analog_3": 0
 }
 
+counter = 0
+
 def write(line):
     sys.stdout.write(line)
     sys.stdout.flush()
 
 def detectEvent(data):
     global previous
-    if abs(data["accel_x"]) < abs(previous["accel_x"])*1.2:
+    #if abs(data["accel_x"]) < abs(previous["accel_x"])*1.2:
+    #    send(data)
+    #elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.2:
         send(data)
-    elif abs(data["accel_y"]) < abs(previous["accel_y"])*1.2:
-        send(data)
-    elif abs(data["accel_z"]) < abs(previous["accel_z"])*1.2:
-        send(data)
+    #elif abs(data["accel_z"]) < abs(previous["accel_z"])*1.2:
+    send(data)
     previous = data
 
 def send(data):
+    global counter
     leds.on()
+    counter = counter + 1
     data_json = json.dumps(data)
     headers = {'Content-type': 'application/json'}
     response = requests.post(url, data=data_json, headers=headers, auth=('raspberrypi', 'install12345!'))
@@ -66,6 +70,7 @@ try:
         acc_values = [round(x, 2) for x in motion.accelerometer()]
 
         output = """
+Counter: {cnt}
 Temp: {t:.2f}c
 Pressure: {p:.2f}{unit}
 Altitude: {a:.2f}m
@@ -95,7 +100,8 @@ Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
             mz=mag_values[2],
             ax=acc_values[0],
             ay=acc_values[1],
-            az=acc_values[2]
+            az=acc_values[2],
+            cnt=counter
         )
 
         data = {
