@@ -122,7 +122,6 @@ write("--- Enviro pHAT Monitoring ---")
 try:
     timestamp = time.time()
     while True:
-        loopCount = loopCount + 1
         rgb = light.rgb()
         analog_values = analog.read_all()
         mag_values = motion.magnetometer()
