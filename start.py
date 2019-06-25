@@ -104,6 +104,9 @@ try:
         acc_values = [round(x, 2) for x in motion.accelerometer()]
 
         output = """
+Device: {device_name}
+Connect Type: {conn_type}
+URL: {rest_url} or {ws_url}
 Counter: {cnt}
 Temp: {t:.2f}c
 Pressure: {p:.2f}{unit}
@@ -135,7 +138,12 @@ Analog: 0: {a0}, 1: {a1}, 2: {a2}, 3: {a3}
             ax=acc_values[0],
             ay=acc_values[1],
             az=acc_values[2],
-            cnt=counter
+            cnt=counter,
+            conn_type=connect_type,
+            device_name=device_name,
+            rest_url=rest_url,
+            ws_url=ws_url
+
         )
 
         data = {
