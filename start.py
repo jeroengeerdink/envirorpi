@@ -186,7 +186,7 @@ try:
         write(output)
         lines = len(output.split("\n"))
         write("\033[{}A".format(lines - 1))
-        if timestamp + 5 < time.time():
+        if timestamp + 1 < time.time():
             buffer = {
                 "systemid": device_name,
                 "timestamp": 0.0,
